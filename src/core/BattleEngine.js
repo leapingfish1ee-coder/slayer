@@ -53,17 +53,14 @@ export class BattleEngine {
     const skill = actor?.skills.find((item) => item.id === skillId);
     if (!actor || !skill) return [];
 
-    const allies = this.state.actors.filter((item) => item.alive && item.team === actor.team);
-    const enemies = this.state.actors.filter((item) => item.alive && item.team !== actor.team);
-
-    switch (skill.target) {
-      case "self": return actor.alive ? [actor] : [];
-      case "ally": return allies;
-      case "enemy": return enemies;
-      case "all_enemies": return enemies;
-      case "all_allies": return allies;
-      default: return this.state.actors.filter((item) => item.alive);
+    if (skill.target === "self") return actor.alive ? [actor] : [];
+    if (skill.target === "ally" || skill.target === "all_allies") {
+      return this.state.actors.filter((item) => item.alive && item.team === actor.team);
     }
+    if (skill.target === "enemy" || skill.target === "all_enemies") {
+      return this.state.actors.filter((item) => item.alive && item.team !== actor.team);
+    }
+    return this.state.actors.filter((item) => item.alive);
   }
 
   executeCommand({ actorId, skillId, targetIds }) {
