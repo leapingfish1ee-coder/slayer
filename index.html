@@ -3,52 +3,64 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Slayer · DRPG 战斗原型</title>
+  <title>Slayer · DRPG Battle Prototype</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">SLAYER / DUNGEON ENCOUNTER</p>
-        <h1>深层遭遇</h1>
+        <p class="eyebrow">SLAYER / SVG DRPG ENCOUNTER</p>
+        <h1>第一人称回合战斗</h1>
       </div>
-      <div id="battle-meta" class="battle-meta" aria-live="polite"></div>
+      <button id="restart-button" class="secondary-button" type="button">重置战斗</button>
     </header>
 
-    <section class="dungeon-viewport" aria-label="第一人称战斗视口">
-      <div class="ceiling-lines" aria-hidden="true"></div>
-      <div class="wall wall-left" aria-hidden="true"></div>
-      <div class="wall wall-right" aria-hidden="true"></div>
-      <div class="far-gate" aria-hidden="true"></div>
-      <div class="floor-grid" aria-hidden="true"></div>
-      <div class="depth-haze" aria-hidden="true"></div>
-      <div id="enemy-line" class="enemy-line" aria-label="敌方队列"></div>
-      <div class="viewport-caption">
-        <span>DEPTH 03</span>
-        <strong>废弃礼拜堂</strong>
-      </div>
+    <section class="encounter-shell" aria-label="DRPG 战斗视图">
+      <section class="viewport-panel">
+        <div class="viewport-meta">
+          <div>
+            <p class="section-label">ENCOUNTER</p>
+            <h2 id="battle-status">等待战斗开始</h2>
+          </div>
+          <div id="battle-meta" class="battle-meta" aria-live="polite"></div>
+        </div>
+        <div class="viewport-frame">
+          <div class="depth-grid" aria-hidden="true"></div>
+          <div id="enemy-formation" class="enemy-formation" aria-label="敌方阵列"></div>
+        </div>
+      </section>
+
+      <section class="party-panel" aria-label="队伍状态">
+        <div class="panel-heading">
+          <div>
+            <p class="section-label">PARTY STATUS</p>
+            <h2>三人队伍</h2>
+          </div>
+          <div id="acting-unit" class="acting-unit">-</div>
+        </div>
+        <div id="party-roster" class="party-roster"></div>
+      </section>
     </section>
 
-    <section id="party-status" class="party-status" aria-label="三人队伍状态"></section>
-
-    <section class="lower-deck">
-      <section class="command-panel" aria-label="行动面板">
-        <div class="command-heading">
+    <section class="control-grid">
+      <section class="command-panel" aria-label="行动指令">
+        <div class="panel-heading">
           <div>
             <p class="section-label">COMMAND</p>
             <h2 id="command-title">等待战斗开始</h2>
           </div>
-          <button id="restart-button" class="secondary-button" type="button">重整队伍</button>
         </div>
         <div id="skill-list" class="skill-list"></div>
         <div id="target-list" class="target-list" aria-live="polite"></div>
       </section>
 
       <section class="log-panel" aria-label="战斗日志">
-        <div class="log-heading">
-          <p class="section-label">COMBAT FEED</p>
-          <span>最近事件</span>
+        <div class="panel-heading">
+          <div>
+            <p class="section-label">BATTLE LOG</p>
+            <h2>结构化事件流</h2>
+          </div>
         </div>
         <ol id="battle-log" class="battle-log"></ol>
       </section>
