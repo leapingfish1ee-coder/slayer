@@ -5,7 +5,8 @@ export class BattleUI {
     this.engine = engine;
     this.pendingSkillId = null;
     this.enemyTimer = null;
-    this.battlefield = document.querySelector("#battlefield");
+    this.enemyLine = document.querySelector("#enemy-line");
+    this.partyStatus = document.querySelector("#party-status");
     this.meta = document.querySelector("#battle-meta");
     this.commandTitle = document.querySelector("#command-title");
     this.skillList = document.querySelector("#skill-list");
@@ -20,7 +21,7 @@ export class BattleUI {
 
     this.targetList.addEventListener("click", (event) => {
       const button = event.target.closest("[data-target-id]");
-      if (button && this.pendingSkillId) this.commitPlayerAction(this.pendingSkillId, button.dataset.targetId);
+      if (button && this.pendingSkillId) this.commitPlayerAction(this.pendingSkillId, [button.dataset.targetId]);
     });
   }
 
@@ -31,25 +32,48 @@ export class BattleUI {
   render() {
     const { state } = this.engine;
     const active = this.engine.activeActor;
+    const enemies = state.actors.filter((actor) => actor.team === "enemy");
+    const party = state.actors.filter((actor) => actor.team === "player");
+
     this.meta.textContent = state.winnerTeam
       ? `战斗结束 · seed ${state.seed}`
-      : `第 ${Math.max(1, state.round)} 回合 · seed ${state.seed}`;
+      : `ROUND ${Math.max(1, state.round)} · ${enemies.filter((actor) => actor.alive).length} ENEMIES`;
 
-    this.battlefield.innerHTML = state.actors.map((actor) => this.actorCard(actor, active?.id === actor.id)).join("");
+    this.enemyLine.innerHTML = enemies.map((actor, index) => this.enemyFigure(actor, active?.id === actor.id, index)).join("");
+    this.partyStatus.innerHTML = party.map((actor, index) => this.partyCard(actor, active?.id === actor.id, index)).join("");
     this.renderCommands();
     this.renderLog();
     this.scheduleEnemyTurn();
   }
 
-  actorCard(actor, active) {
+  enemyFigure(actor, active, index) {
     const hpPercent = Math.max(0, Math.round((actor.hp / actor.maxHp) * 100));
     return `
-      <article class="actor-card ${active ? "active" : ""} ${actor.alive ? "" : "defeated"}" data-actor-id="${actor.id}">
-        <p class="actor-team">${actor.team === "player" ? "PLAYER" : "ENEMY"}</p>
-        <div class="actor-name">${actor.name}</div>
-        <div class="hp-row"><span>HP</span><strong>${actor.hp} / ${actor.maxHp}</strong></div>
-        <div class="hp-track"><div class="hp-fill" style="width:${hpPercent}%"></div></div>
-        <div class="stat-row"><span>ATK ${actor.attack}</span><span>DEF ${actor.defense}</span><span>SPD ${actor.speed}</span></div>
+      <article class="enemy-figure enemy-shape-${(index % 4) + 1} ${active ? "active" : ""} ${actor.alive ? "" : "defeated"}" data-actor-id="${actor.id}">
+        <div class="enemy-silhouette" aria-hidden="true"><span class="eye eye-left"></span><span class="eye eye-right"></span></div>
+        <div class="enemy-plate">
+          <strong>${actor.name}</strong>
+          <div class="enemy-hp-track"><div class="enemy-hp-fill" style="width:${hpPercent}%"></div></div>
+          <span>${actor.alive ? `${actor.hp} / ${actor.maxHp}` : "DEFEATED"}</span>
+        </div>
+      </article>`;
+  }
+
+  partyCard(actor, active, index) {
+    const hpPercent = Math.max(0, Math.round((actor.hp / actor.maxHp) * 100));
+    const roles = ["VANGUARD", "RANGER", "MYSTIC"];
+    return `
+      <article class="party-card ${active ? "active" : ""} ${actor.alive ? "" : "defeated"}" data-actor-id="${actor.id}">
+        <div class="party-index">0${index + 1}</div>
+        <div class="party-copy">
+          <span>${roles[index] ?? "ADVENTURER"}</span>
+          <strong>${actor.name}</strong>
+        </div>
+        <div class="party-vitals">
+          <div><span>HP</span><strong>${actor.hp}<small> / ${actor.maxHp}</small></strong></div>
+          <div class="party-hp-track"><div class="party-hp-fill" style="width:${hpPercent}%"></div></div>
+        </div>
+        <div class="party-stats"><span>ATK ${actor.attack}</span><span>DEF ${actor.defense}</span><span>SPD ${actor.speed}</span></div>
       </article>`;
   }
 
@@ -58,7 +82,7 @@ export class BattleUI {
     const actor = this.engine.activeActor;
 
     if (state.phase === BattlePhase.CHECK_RESULT) {
-      this.commandTitle.textContent = state.winnerTeam === "player" ? "战斗胜利" : state.winnerTeam === "enemy" ? "战斗失败" : "平局";
+      this.commandTitle.textContent = state.winnerTeam === "player" ? "队伍胜利" : state.winnerTeam === "enemy" ? "队伍覆灭" : "战斗中止";
       this.skillList.innerHTML = "";
       this.targetList.innerHTML = "";
       return;
@@ -72,9 +96,10 @@ export class BattleUI {
 
     const playerTurn = actor.team === "player" && state.phase === BattlePhase.WAIT_ACTION;
     this.commandTitle.textContent = playerTurn ? `${actor.name} · 选择行动` : `${actor.name} · 行动中`;
-    this.skillList.innerHTML = actor.skills.map((skill) => `
+    this.skillList.innerHTML = actor.skills.map((skill, index) => `
       <button class="skill-button" type="button" data-skill-id="${skill.id}" ${playerTurn ? "" : "disabled"}>
-        <strong>${skill.name}</strong><span>${skill.description}</span>
+        <span class="skill-key">0${index + 1}</span>
+        <span class="skill-copy"><strong>${skill.name}</strong><small>${skill.description}</small></span>
       </button>`).join("");
 
     if (!playerTurn) {
@@ -86,20 +111,34 @@ export class BattleUI {
   chooseSkill(skillId) {
     const actor = this.engine.activeActor;
     if (!actor || actor.team !== "player" || this.engine.state.phase !== BattlePhase.WAIT_ACTION) return;
+
+    const skill = actor.skills.find((item) => item.id === skillId);
     const targets = this.engine.getValidTargets(actor.id, skillId);
+    if (!skill || targets.length === 0) return;
+
+    if (skill.target === "all_enemies" || skill.target === "all_allies") {
+      this.commitPlayerAction(skillId, targets.map((target) => target.id));
+      return;
+    }
+
     if (targets.length === 1) {
-      this.commitPlayerAction(skillId, targets[0].id);
+      this.commitPlayerAction(skillId, [targets[0].id]);
       return;
     }
 
     this.pendingSkillId = skillId;
-    this.targetList.innerHTML = targets.map((target) => `<button class="target-button" type="button" data-target-id="${target.id}">目标：${target.name}</button>`).join("");
+    this.targetList.innerHTML = targets.map((target) => {
+      const side = target.team === "player" ? "ALLY" : "ENEMY";
+      return `<button class="target-button" type="button" data-target-id="${target.id}"><span>${side}</span><strong>${target.name}</strong><small>HP ${target.hp}/${target.maxHp}</small></button>`;
+    }).join("");
   }
 
-  commitPlayerAction(skillId, targetId) {
+  commitPlayerAction(skillId, targetIds) {
+    const actor = this.engine.activeActor;
+    if (!actor || actor.team !== "player") return;
     this.pendingSkillId = null;
     this.targetList.innerHTML = "";
-    this.engine.executeCommand({ actorId: "player", skillId, targetIds: [targetId] });
+    this.engine.executeCommand({ actorId: actor.id, skillId, targetIds });
   }
 
   scheduleEnemyTurn() {
@@ -111,13 +150,13 @@ export class BattleUI {
       if (this.engine.activeActor?.id !== actor.id || this.engine.state.phase !== BattlePhase.WAIT_ACTION) return;
       const skill = this.engine.getAvailableSkills(actor.id)[0];
       const targets = this.engine.getValidTargets(actor.id, skill.id);
-      const target = targets.sort((a, b) => a.hp - b.hp)[0];
+      const target = [...targets].sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
       if (target) this.engine.executeCommand({ actorId: actor.id, skillId: skill.id, targetIds: [target.id] });
-    }, 480);
+    }, 520);
   }
 
   renderLog() {
-    const visible = this.engine.state.events.slice(-18).reverse();
+    const visible = this.engine.state.events.slice(-16).reverse();
     this.log.innerHTML = visible.map((event) => {
       const formatted = this.formatEvent(event);
       return formatted ? `<li class="${formatted.tone}">${formatted.text}</li>` : "";
@@ -126,14 +165,14 @@ export class BattleUI {
 
   formatEvent(event) {
     switch (event.type) {
-      case "battle_start": return { tone: "important", text: `战斗开始 · RNG seed ${event.seed}` };
-      case "round_start": return { tone: "", text: `第 ${event.round} 回合开始。` };
+      case "battle_start": return { tone: "important", text: `遭遇开始 · RNG ${event.seed}` };
+      case "round_start": return { tone: "round", text: `ROUND ${event.round}` };
       case "turn_start": return { tone: "", text: `${event.actorName} 获得行动权。` };
       case "action_start": return { tone: "important", text: `${event.actorName} 使用「${event.skillName}」。` };
-      case "damage": return { tone: event.critical ? "danger" : "", text: `${event.targetName} 受到 ${event.amount} 点伤害${event.critical ? "（暴击）" : ""}。` };
-      case "heal": return { tone: "", text: `${event.targetName} 恢复 ${event.amount} 点生命值。` };
+      case "damage": return { tone: event.critical ? "danger" : "", text: `${event.targetName} 受到 ${event.amount} 点伤害${event.critical ? " · CRITICAL" : ""}。` };
+      case "heal": return { tone: "heal", text: `${event.targetName} 恢复 ${event.amount} 点生命值。` };
       case "defeated": return { tone: "danger", text: `${event.actorName} 被击败。` };
-      case "battle_end": return { tone: "important", text: event.winnerTeam === "player" ? "战斗结束：玩家胜利。" : event.winnerTeam === "enemy" ? "战斗结束：敌方胜利。" : "战斗结束：平局。" };
+      case "battle_end": return { tone: "important", text: event.winnerTeam === "player" ? "敌阵崩溃，队伍胜利。" : event.winnerTeam === "enemy" ? "队伍全灭。" : "战斗结束。" };
       default: return null;
     }
   }

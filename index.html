@@ -3,39 +3,55 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Slayer · 回合制战斗原型</title>
+  <title>Slayer · DRPG 战斗原型</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">SLAYER / BATTLE PROTOTYPE</p>
-        <h1>基础回合制战斗</h1>
+        <p class="eyebrow">SLAYER / DUNGEON ENCOUNTER</p>
+        <h1>深层遭遇</h1>
       </div>
       <div id="battle-meta" class="battle-meta" aria-live="polite"></div>
     </header>
 
-    <section id="battlefield" class="battlefield" aria-label="战斗区域"></section>
-
-    <section class="command-panel" aria-label="行动面板">
-      <div class="command-heading">
-        <div>
-          <p class="section-label">COMMAND</p>
-          <h2 id="command-title">等待战斗开始</h2>
-        </div>
-        <button id="restart-button" class="secondary-button" type="button">重新开始</button>
+    <section class="dungeon-viewport" aria-label="第一人称战斗视口">
+      <div class="ceiling-lines" aria-hidden="true"></div>
+      <div class="wall wall-left" aria-hidden="true"></div>
+      <div class="wall wall-right" aria-hidden="true"></div>
+      <div class="far-gate" aria-hidden="true"></div>
+      <div class="floor-grid" aria-hidden="true"></div>
+      <div class="depth-haze" aria-hidden="true"></div>
+      <div id="enemy-line" class="enemy-line" aria-label="敌方队列"></div>
+      <div class="viewport-caption">
+        <span>DEPTH 03</span>
+        <strong>废弃礼拜堂</strong>
       </div>
-      <div id="skill-list" class="skill-list"></div>
-      <div id="target-list" class="target-list" aria-live="polite"></div>
     </section>
 
-    <section class="log-panel" aria-label="战斗日志">
-      <div class="log-heading">
-        <p class="section-label">BATTLE LOG</p>
-        <span>结构化事件 → UI 文本</span>
-      </div>
-      <ol id="battle-log" class="battle-log"></ol>
+    <section id="party-status" class="party-status" aria-label="三人队伍状态"></section>
+
+    <section class="lower-deck">
+      <section class="command-panel" aria-label="行动面板">
+        <div class="command-heading">
+          <div>
+            <p class="section-label">COMMAND</p>
+            <h2 id="command-title">等待战斗开始</h2>
+          </div>
+          <button id="restart-button" class="secondary-button" type="button">重整队伍</button>
+        </div>
+        <div id="skill-list" class="skill-list"></div>
+        <div id="target-list" class="target-list" aria-live="polite"></div>
+      </section>
+
+      <section class="log-panel" aria-label="战斗日志">
+        <div class="log-heading">
+          <p class="section-label">COMBAT FEED</p>
+          <span>最近事件</span>
+        </div>
+        <ol id="battle-log" class="battle-log"></ol>
+      </section>
     </section>
   </main>
 
