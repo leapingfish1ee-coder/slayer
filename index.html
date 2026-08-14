@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slayer · 回合制战斗原型</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">SLAYER / BATTLE PROTOTYPE</p>
+        <h1>基础回合制战斗</h1>
+      </div>
+      <div id="battle-meta" class="battle-meta" aria-live="polite"></div>
+    </header>
+
+    <section id="battlefield" class="battlefield" aria-label="战斗区域"></section>
+
+    <section class="command-panel" aria-label="行动面板">
+      <div class="command-heading">
+        <div>
+          <p class="section-label">COMMAND</p>
+          <h2 id="command-title">等待战斗开始</h2>
+        </div>
+        <button id="restart-button" class="secondary-button" type="button">重新开始</button>
+      </div>
+      <div id="skill-list" class="skill-list"></div>
+      <div id="target-list" class="target-list" aria-live="polite"></div>
+    </section>
+
+    <section class="log-panel" aria-label="战斗日志">
+      <div class="log-heading">
+        <p class="section-label">BATTLE LOG</p>
+        <span>结构化事件 → UI 文本</span>
+      </div>
+      <ol id="battle-log" class="battle-log"></ol>
+    </section>
+  </main>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

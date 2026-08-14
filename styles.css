@@ -1,0 +1,224 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #090b10;
+  color: #edf0f7;
+  --panel: #11151d;
+  --panel-strong: #171c26;
+  --line: #252c39;
+  --muted: #8f99ab;
+  --accent: #d8ff4f;
+  --danger: #ff6b6b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(216, 255, 79, 0.08), transparent 28rem),
+    linear-gradient(180deg, #0b0e14 0%, #07090d 100%);
+}
+
+button { font: inherit; }
+
+.app-shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 36px 0 48px;
+}
+
+.topbar,
+.command-heading,
+.log-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+}
+
+h1, h2, p { margin: 0; }
+
+h1 {
+  margin-top: 5px;
+  font-size: clamp(28px, 5vw, 48px);
+  letter-spacing: -0.04em;
+}
+
+h2 { font-size: 20px; }
+
+.eyebrow,
+.section-label {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.battle-meta,
+.log-heading span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.battlefield {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.actor-card,
+.command-panel,
+.log-panel {
+  border: 1px solid var(--line);
+  background: rgba(17, 21, 29, 0.92);
+  border-radius: 16px;
+}
+
+.actor-card {
+  position: relative;
+  min-height: 230px;
+  padding: 24px;
+  overflow: hidden;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.actor-card.active {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.actor-card.defeated { opacity: 0.48; }
+
+.actor-team {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.actor-name {
+  margin-top: 8px;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.hp-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 38px;
+  font-size: 13px;
+}
+
+.hp-track {
+  height: 10px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #272d38;
+}
+
+.hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d8ff4f, #f4ffad);
+  transition: width 240ms ease;
+}
+
+.stat-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.command-panel,
+.log-panel {
+  margin-top: 18px;
+  padding: 22px;
+}
+
+.skill-list,
+.target-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.skill-button,
+.target-button,
+.secondary-button {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-strong);
+  color: #edf0f7;
+  cursor: pointer;
+}
+
+.skill-button {
+  min-width: 150px;
+  padding: 13px 15px;
+  text-align: left;
+}
+
+.skill-button strong,
+.skill-button span { display: block; }
+
+.skill-button span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.skill-button:hover:not(:disabled),
+.target-button:hover,
+.secondary-button:hover {
+  border-color: var(--accent);
+}
+
+.skill-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.target-button,
+.secondary-button { padding: 9px 12px; }
+
+.target-list:empty { display: none; }
+
+.log-panel { min-height: 220px; }
+
+.battle-log {
+  display: grid;
+  gap: 8px;
+  max-height: 280px;
+  margin: 18px 0 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.battle-log li {
+  padding: 9px 11px;
+  border-left: 2px solid var(--line);
+  color: #cfd5df;
+  background: rgba(255,255,255,0.015);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.battle-log li.important { border-left-color: var(--accent); color: #fff; }
+.battle-log li.danger { border-left-color: var(--danger); }
+
+@media (max-width: 720px) {
+  .app-shell { width: min(100% - 20px, 1120px); padding-top: 22px; }
+  .topbar { align-items: start; flex-direction: column; }
+  .battlefield { grid-template-columns: 1fr; }
+  .actor-card { min-height: 190px; }
+  .command-heading { align-items: start; }
+  .log-heading span { display: none; }
+}
