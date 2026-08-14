@@ -54,8 +54,12 @@ export class BattleEngine {
     if (!actor || !skill) return [];
 
     if (skill.target === "self") return actor.alive ? [actor] : [];
-    if (skill.target === "ally") return this.state.actors.filter((item) => item.alive && item.team === actor.team);
-    if (skill.target === "enemy") return this.state.actors.filter((item) => item.alive && item.team !== actor.team);
+    if (skill.target === "ally" || skill.target === "all_allies") {
+      return this.state.actors.filter((item) => item.alive && item.team === actor.team);
+    }
+    if (skill.target === "enemy" || skill.target === "all_enemies") {
+      return this.state.actors.filter((item) => item.alive && item.team !== actor.team);
+    }
     return this.state.actors.filter((item) => item.alive);
   }
 
